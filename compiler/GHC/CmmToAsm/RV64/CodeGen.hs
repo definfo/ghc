@@ -689,10 +689,6 @@ getRegister' config plat expr =
       where
         width = typeWidth (cmmRegType reg)
 
-    -- Handle MO_RelaxedRead as a normal CmmLoad, to allow
-    -- non-trivial addressing modes to be used.
-    CmmMachOp (MO_RelaxedRead w) [e] ->
-      getRegister (CmmLoad e (cmmBits w) NaturallyAligned)
     -- for MachOps, see GHC.Cmm.MachOp
     -- For CmmMachOp, see GHC.Cmm.Expr
     CmmMachOp op [e] -> do
@@ -715,7 +711,7 @@ getRegister' config plat expr =
                     `snocOL` NEG (OpReg w dst) (OpReg w reg)
               )
         -- TODO: Can this case happen?
-        MO_SF_Round from to | from < W32 -> do
+        MO_SF_Conv from to | from < W32 -> do
           -- extend to the smallest available representation
           (reg_x, code_x) <- signExtendReg from W32 reg
           pure
@@ -726,7 +722,7 @@ getRegister' config plat expr =
                     `appOL` code_x
                     `snocOL` annExpr expr (FCVT IntToFloat (OpReg to dst) (OpReg from reg_x)) -- (Signed ConVerT Float)
               )
-        MO_SF_Round from to ->
+        MO_SF_Conv from to ->
           pure
             $ Any
               (floatFormat to)
@@ -735,7 +731,7 @@ getRegister' config plat expr =
                     `snocOL` annExpr expr (FCVT IntToFloat (OpReg to dst) (OpReg from reg)) -- (Signed ConVerT Float)
               )
         -- TODO: Can this case happen?
-        MO_FS_Truncate from to
+        MO_FS_Conv from to
           | to < W32 ->
               pure
                 $ Any
@@ -747,7 +743,7 @@ getRegister' config plat expr =
                         annExpr expr (FCVT FloatToInt (OpReg W32 dst) (OpReg from reg))
                         `appOL` signExtendAdjustPrecission W32 to dst dst -- (float convert (-> zero) signed)
                   )
-        MO_FS_Truncate from to ->
+        MO_FS_Conv from to ->
           pure
             $ Any
               (intFormat to)
@@ -776,8 +772,6 @@ getRegister' config plat expr =
               )
         MO_SS_Conv from to -> ss_conv from to reg code
         MO_FF_Conv from to -> return $ Any (floatFormat to) (\dst -> code `snocOL` annExpr e (FCVT FloatToFloat (OpReg to dst) (OpReg from reg)))
-        MO_WF_Bitcast w    -> return $ Any (floatFormat w)  (\dst -> code `snocOL` MOV (OpReg w dst) (OpReg w reg))
-        MO_FW_Bitcast w    -> return $ Any (intFormat w)    (\dst -> code `snocOL` MOV (OpReg w dst) (OpReg w reg))
 
         -- Conversions
         -- TODO: Duplication with MO_UU_Conv
@@ -1863,14 +1857,8 @@ genCCall (PrimTarget mop) dest_regs arg_regs = do
     MO_SubIntC _w -> unsupported mop
     MO_U_Mul2 _w -> unsupported mop
     -- Memory Ordering
-    -- The related C functions are:
-    -- #include <stdatomic.h>
-    -- atomic_thread_fence(memory_order_acquire);
-    -- atomic_thread_fence(memory_order_release);
-    -- atomic_thread_fence(memory_order_seq_cst);
-    MO_AcquireFence -> pure (unitOL (FENCE FenceRead FenceReadWrite))
-    MO_ReleaseFence -> pure (unitOL (FENCE FenceReadWrite FenceWrite))
-    MO_SeqCstFence -> pure (unitOL (FENCE FenceReadWrite FenceReadWrite))
+    MO_ReadBarrier -> pure (unitOL (FENCE FenceRead FenceRead))
+    MO_WriteBarrier -> pure (unitOL (FENCE FenceWrite FenceWrite))
     MO_Touch -> pure nilOL -- Keep variables live (when using interior pointers)
     -- Prefetch
     MO_Prefetch_Data _n -> pure nilOL -- Prefetch hint.
