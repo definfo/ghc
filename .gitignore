@@ -110,6 +110,7 @@ _darcs/
 /compiler/ClosureTypes.h
 /compiler/FunTypes.h
 /compiler/MachRegs.h
+/compiler/MachRegs
 /compiler/ghc-llvm-version.h
 /compiler/ghc.cabal
 /compiler/ghc.cabal.old
