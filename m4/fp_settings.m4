@@ -75,21 +75,11 @@ AC_DEFUN([FP_SETTINGS],
         fi
     fi
 
-    # Platform-agnostic tools
-    if test -z "$ClangCmd"; then
-        ClangCmd="clang"
-    fi
     SettingsClangCommand="$ClangCmd"
 
     # LLVM backend tools
-    if test -z "$LlcCmd"; then
-        LlcCmd="llc"
-    fi
     SettingsLlcCommand="$LlcCmd"
 
-    if test -z "$OptCmd"; then
-        OptCmd="opt"
-    fi
     SettingsOptCommand="$OptCmd"
 
     # Mac-only tools
