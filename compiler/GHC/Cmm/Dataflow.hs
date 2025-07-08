@@ -47,7 +47,6 @@ import Data.Kind (Type)
 
 import GHC.Cmm.Dataflow.Block
 import GHC.Cmm.Dataflow.Graph
-import GHC.Cmm.Dataflow.Collections
 import GHC.Cmm.Dataflow.Label
 
 type family   Fact (x :: Extensibility) f :: Type

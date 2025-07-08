@@ -24,7 +24,7 @@ import GHC.CmmToLlvm.Mangler
 
 import GHC.StgToCmm.CgUtils ( fixStgRegisters )
 import GHC.Cmm
-import GHC.Cmm.Dataflow.Collections
+import GHC.Cmm.Dataflow.Label
 
 import GHC.Utils.BufHandle
 import GHC.Driver.DynFlags
