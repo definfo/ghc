@@ -230,10 +230,10 @@ test('CheckBoundsOK', normal, compile_and_run, ['-fcheck-prim-bounds'])
 # not implemeted correctly (according to
 # Note [MO_S_MulMayOflo significant width]) and may require fixing/adjustment.
 test('MulMayOflo_full',
-     [ extra_files(['MulMayOflo.hs']),
+     [ extra_files(['MulMayOflo.hs', 'MulMayOflo_full.cmm']),
        when(unregisterised(), skip),
        unless(
-         arch('aarch64') or arch('x86_64') or arch('i386'),
+         arch('aarch64') or arch('x86_64') or arch('i386') or arch('riscv64'),
          expect_broken(23742)
        ),
         ignore_stdout],
