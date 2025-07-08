@@ -1,3 +1,4 @@
+{-# LANGUAGE ImportQualifiedPost #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Native code generator for RiscV64 architectures
