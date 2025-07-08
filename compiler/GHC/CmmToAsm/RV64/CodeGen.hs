@@ -58,6 +58,7 @@ import GHC.Utils.Misc
 import GHC.Utils.Monad
 import GHC.Utils.Outputable
 import GHC.Utils.Panic
+import GHC.Utils.Panic.Plain
 
 -- For an overview of an NCG's structure, see Note [General layout of an NCG]
 
