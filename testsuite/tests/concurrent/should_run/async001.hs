@@ -8,12 +8,12 @@ import System.IO.Unsafe
 -- 'onException'.
 
 main = do
-  let x = unsafePerformIO $ 
-             (do threadDelay 1000000; return 42)
+  let x = unsafePerformIO $
+             (do threadDelay 3000000; return 42)
              `onException` return ()
 
   t <- forkIO $ do evaluate x; return ()
-  threadDelay 1000
+  threadDelay 6000
   killThread t
 
   print x `E.catch` \e -> putStrLn ("main caught: " ++ show (e::SomeException))
